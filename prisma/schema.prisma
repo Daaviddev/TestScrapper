@@ -1,0 +1,56 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model company {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  url      String
+  listings listing[]
+}
+
+model listing {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  link            String
+  price           Float
+  oldPrice        Float?
+  priceChangedAt  DateTime?
+  isSold          Boolean         @default(false)
+  isSoldChangedAt DateTime?
+  isPromoted      Boolean         @default(false)
+  excludeFromData Boolean         @default(false)
+  companyId       String          @db.ObjectId
+  company         company         @relation(fields: [companyId], references: [id])
+  listingDetails  listingDetails?
+  carId           String          @db.ObjectId
+  car             car             @relation(fields: [carId], references: [id])
+}
+
+model listingDetails {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  imageUrl        String
+  mileage         Float
+  addDate         DateTime
+  listingIdNumber Int
+  listing         listing  @relation(fields: [id], references: [id])
+}
+
+model car {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  year      Int
+  fuel      String
+  gear      String
+  engine    Float
+  power     Float
+  make      String
+  model     String
+  tip       String
+  modelYear Int
+  listings  listing[]
+}
