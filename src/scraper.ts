@@ -1,6 +1,7 @@
 import { Browser, Page } from 'puppeteer-extra-plugin/dist/puppeteer';
 import {
   CarDetails,
+  Listing,
   ListingDetails,
   scrapeListingDetails,
 } from './scrapeDetails';
@@ -8,24 +9,14 @@ import {
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import logger from './utils/logger';
 import puppeteer from 'puppeteer-extra';
+import { saveListingsToDb } from './utils/saveToDb';
 
 puppeteer.use(StealthPlugin());
 
-interface Listing {
-  title: string | null;
-  link: string | null;
-  price: string | null;
-  oldPrice?: number | null;
-  priceChangedAt?: Date;
-  isSold?: boolean;
-  isSoldChangedAt?: Date;
-  isPromoted?: boolean;
-  excludeFromData?: boolean;
-  details?: ListingDetails;
-  car?: CarDetails;
-}
-
-export async function scrapeListings(url: string): Promise<Listing[]> {
+export async function scrapeListings(
+  url: string,
+  companyId: string
+): Promise<void> {
   const browser: Browser = await puppeteer.launch({ headless: true });
   const page: Page = await browser.newPage();
   try {
@@ -43,7 +34,7 @@ export async function scrapeListings(url: string): Promise<Listing[]> {
       nextPageUrl = await getNextPageUrl(page, nextPageUrl);
     }
 
-    return listings;
+    await saveListingsToDb(listings, companyId);
   } catch (error) {
     logger.error(`Error scraping listings from ${url}: ${error}`);
     throw error;
@@ -98,7 +89,7 @@ async function extractListingsFromPage(
     })
   );
 
-  return listings;
+  return listings.filter((listing) => listing.link !== null); // Filter out listings with null links
 }
 
 async function getNextPageUrl(

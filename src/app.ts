@@ -23,7 +23,7 @@ app.post('/scrape/:companyId', async (req, res) => {
       return res.status(404).json({ error: 'Company not found' });
     }
 
-    const listings = await scrapeListings(company.url);
+    const listings = await scrapeListings(company.url, companyId);
     res.json(listings);
   } catch (error: any) {
     res.status(500).json({ error: error.message });

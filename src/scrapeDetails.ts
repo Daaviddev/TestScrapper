@@ -24,6 +24,20 @@ export interface CarDetails {
   modelYear?: number;
 }
 
+export interface Listing {
+  title: string | null;
+  link: string | null;
+  price: string | null;
+  oldPrice?: number | null;
+  priceChangedAt?: Date;
+  isSold?: boolean;
+  isSoldChangedAt?: Date;
+  isPromoted?: boolean;
+  excludeFromData?: boolean;
+  details?: ListingDetails;
+  car?: CarDetails;
+}
+
 export async function scrapeListingDetails(
   browser: Browser,
   url: string
